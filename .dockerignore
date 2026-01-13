@@ -1,0 +1,8 @@
+vendor/
+node_modules/
+.git/
+moodledata/
+db_data/
+.env
+bin/
+tests/

@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:11.7
+    container_name: moodle-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: moodle
+      MYSQL_USER: moodle
+      MYSQL_PASSWORD: moodle
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # Three identical web replicas (use same image). We do not expose their ports directly;
+  # traffic is routed through the apache-proxy service.
+  web1:
+    image: moodle-web:latest
+    container_name: moodle-web-1
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      MOODLE_DBHOST: db
+      MOODLE_DBNAME: moodle
+      MOODLE_DBUSER: moodle
+      MOODLE_DBPASS: moodle
+    volumes:
+      - ./:/var/www/html
+      - moodledata:/var/moodledata
+
+  web2:
+    image: moodle-web:latest
+    container_name: moodle-web-2
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      MOODLE_DBHOST: db
+      MOODLE_DBNAME: moodle
+      MOODLE_DBUSER: moodle
+      MOODLE_DBPASS: moodle
+    volumes:
+      - ./:/var/www/html
+      - moodledata:/var/moodledata
+
+  web3:
+    image: moodle-web:latest
+    container_name: moodle-web-3
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      MOODLE_DBHOST: db
+      MOODLE_DBNAME: moodle
+      MOODLE_DBUSER: moodle
+      MOODLE_DBPASS: moodle
+    volumes:
+      - ./:/var/www/html
+      - moodledata:/var/moodledata
+
+  # Redis for centralized session management
+  redis:
+    image: redis:7-alpine
+    container_name: moodle-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx reverse proxy that balances traffic across web1, web2 and web3
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web1
+      - web2
+      - web3
+
+volumes:
+  db_data:
+  moodledata:
+  redis_data:

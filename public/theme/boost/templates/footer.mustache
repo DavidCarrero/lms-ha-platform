@@ -98,3 +98,31 @@ require(['theme_boost/footer-popover'], function(FooterPopover) {
     FooterPopover.init();
 });
 {{/js}}
+
+<script>
+    (function(){
+        try {
+            fetch('/serverinfo.php')
+                .then(function(r){ return r.text(); })
+                .then(function(t){
+                    var inst = t.trim();
+                    console.log('instance='+inst);
+                    // small badge visible in bottom-right for 5s
+                    var b = document.createElement('div');
+                    b.id = 'moodle-instance-badge';
+                    b.textContent = 'instance: '+inst;
+                    b.style.position = 'fixed';
+                    b.style.right = '8px';
+                    b.style.bottom = '8px';
+                    b.style.background = 'rgba(0,0,0,0.6)';
+                    b.style.color = 'white';
+                    b.style.padding = '6px 8px';
+                    b.style.borderRadius = '4px';
+                    b.style.zIndex = 2147483647;
+                    b.style.fontSize = '12px';
+                    document.body.appendChild(b);
+                    setTimeout(function(){ try{ b.parentNode.removeChild(b); }catch(e){} }, 5000);
+                }).catch(function(e){ console.error('instance fetch err', e); });
+        } catch(e) { console.error(e); }
+    })();
+</script>
