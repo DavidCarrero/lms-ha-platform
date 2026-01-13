@@ -41,9 +41,16 @@ RUN echo 'memory_limit = 512M' > /usr/local/etc/php/conf.d/moodle.ini \
     && echo 'max_input_vars = 5000' >> /usr/local/etc/php/conf.d/moodle.ini \
     && echo 'max_execution_time = 300' >> /usr/local/etc/php/conf.d/moodle.ini \
     && echo 'opcache.enable = 1' >> /usr/local/etc/php/conf.d/moodle.ini \
-    && echo 'opcache.memory_consumption = 128' >> /usr/local/etc/php/conf.d/moodle.ini \
-    && echo 'opcache.max_accelerated_files = 10000' >> /usr/local/etc/php/conf.d/moodle.ini \
-    && echo 'zend.exception_ignore_args = On' >> /usr/local/etc/php/conf.d/moodle.ini
+    && echo 'opcache.memory_consumption = 256' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'opcache.interned_strings_buffer = 16' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'opcache.max_accelerated_files = 20000' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'opcache.revalidate_freq = 60' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'opcache.fast_shutdown = 1' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'realpath_cache_size = 4096K' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'realpath_cache_ttl = 600' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'zend.exception_ignore_args = On' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'session.save_handler = redis' >> /usr/local/etc/php/conf.d/moodle.ini \
+    && echo 'session.save_path = "tcp://redis:6379"' >> /usr/local/etc/php/conf.d/moodle.ini
 # Configurar Apache para usar /public como DocumentRoot
 RUN echo '<VirtualHost *:80>\n\
     ServerAdmin webmaster@localhost\n\
